@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyBrilliance — Digital strategy &amp; value consulting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#EDE7DC;
+    --paper:#12171B;
+    --accent:#D8AF66;
+    --slate:#8C97A0;
+    --line:#232B31;
+    --line-dark:#2E3940;
+    --panel:#0C1013;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;text-decoration:none;}
+
+  .wrap{
+    max-width:1040px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--slate);
+  }
+
+  h1,h2,h3{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    letter-spacing:-0.01em;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(18,23,27,0.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:72px;
+  }
+  .brand{
+    font-family:'Fraunces',serif;
+    font-size:19px;
+    font-weight:500;
+  }
+  .brand span{color:var(--accent);}
+  .nav-links{
+    display:flex;
+    gap:32px;
+    font-size:14px;
+  }
+  .nav-links a{
+    color:var(--slate);
+    transition:color .2s ease;
+  }
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{
+    padding:9px 18px;
+    border:1px solid var(--ink);
+    border-radius:2px;
+    font-size:13px;
+    font-weight:500;
+    white-space:nowrap;
+  }
+  .nav-cta:hover{background:var(--ink);color:var(--paper);}
+
+  @media (max-width:720px){
+    .nav-links{display:none;}
+  }
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    padding:120px 0 100px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero .eyebrow{margin-bottom:22px;}
+  .hero h1{
+    font-size:clamp(38px,6vw,64px);
+    line-height:1.06;
+    max-width:820px;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--accent);
+  }
+  .hero p.lede{
+    margin-top:26px;
+    max-width:520px;
+    font-size:18px;
+    color:var(--slate);
+  }
+  .hero .cta-row{
+    margin-top:42px;
+    display:flex;
+    gap:18px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .btn-primary{
+    background:var(--ink);
+    color:var(--paper);
+    padding:14px 26px;
+    border-radius:2px;
+    font-size:14px;
+    font-weight:500;
+    display:inline-block;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .btn-primary:hover{background:#D9D2C4;transform:translateY(-1px);}
+  .btn-ghost{
+    font-size:14px;
+    color:var(--slate);
+    border-bottom:1px solid var(--line);
+    padding-bottom:2px;
+  }
+  .btn-ghost:hover{color:var(--ink);border-color:var(--ink);}
+
+  /* horizon signature */
+  .horizon{
+    margin-top:90px;
+    height:2px;
+    width:100%;
+    background:linear-gradient(90deg, transparent 0%, var(--line-dark) 8%, var(--slate) 45%, var(--accent) 55%, var(--line-dark) 92%, transparent 100%);
+    background-size:220% 100%;
+    animation:drift 14s ease-in-out infinite;
+    opacity:0.85;
+  }
+  @keyframes drift{
+    0%{background-position:0% 0;}
+    50%{background-position:100% 0;}
+    100%{background-position:0% 0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .horizon{animation:none;}
+  }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{
+    padding:96px 0;
+    border-top:1px solid var(--line);
+  }
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:40px;
+    margin-bottom:56px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-size:clamp(28px,3.4vw,38px);
+    max-width:520px;
+  }
+  .section-head p{
+    color:var(--slate);
+    max-width:360px;
+    font-size:15px;
+  }
+
+  /* ---------- WHAT WE DO ---------- */
+  .pillars{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .pillar{
+    background:var(--paper);
+    padding:36px 30px;
+  }
+  .pillar .mark{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--accent);
+    margin-bottom:18px;
+    display:block;
+  }
+  .pillar h3{
+    font-size:21px;
+    margin-bottom:12px;
+    font-weight:500;
+  }
+  .pillar p{
+    color:var(--slate);
+    font-size:14.5px;
+  }
+  @media (max-width:780px){
+    .pillars{grid-template-columns:1fr;}
+  }
+
+  /* ---------- WHO IT'S FOR ---------- */
+  .for-grid{
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:60px;
+    align-items:start;
+  }
+  .for-list{list-style:none;}
+  .for-list li{
+    padding:20px 0;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    gap:18px;
+    align-items:baseline;
+  }
+  .for-list li:first-child{padding-top:0;}
+  .for-list .q{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--accent);
+    flex-shrink:0;
+    width:26px;
+  }
+  .for-copy{color:var(--slate);font-size:16px;line-height:1.75;}
+  .for-copy strong{color:var(--ink);font-weight:500;}
+
+  @media (max-width:780px){
+    .for-grid{grid-template-columns:1fr;gap:36px;}
+  }
+
+  /* ---------- PROCESS ---------- */
+  .process{
+    counter-reset:step;
+  }
+  .step{
+    display:grid;
+    grid-template-columns:90px 1fr;
+    gap:24px;
+    padding:34px 0;
+    border-bottom:1px solid var(--line);
+    align-items:start;
+  }
+  .step:last-child{border-bottom:none;}
+  .step .num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--slate);
+    padding-top:4px;
+  }
+  .step h3{
+    font-size:20px;
+    margin-bottom:8px;
+    font-weight:500;
+  }
+  .step p{
+    color:var(--slate);
+    font-size:15px;
+    max-width:520px;
+  }
+
+  /* ---------- WHY / FOUNDERS (raised panel) ---------- */
+  .dark{
+    background:var(--panel);
+    border-top:1px solid var(--line-dark);
+    border-bottom:1px solid var(--line-dark);
+  }
+
+  .why-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:48px;
+  }
+  .why-text p{
+    color:#A6B0B8;
+    font-size:16.5px;
+    line-height:1.8;
+    margin-bottom:18px;
+    max-width:480px;
+  }
+
+  .founders{
+    border-left:1px solid var(--line-dark);
+    padding-left:44px;
+  }
+  .founder{
+    padding:22px 0;
+    border-bottom:1px solid var(--line-dark);
+  }
+  .founder:last-child{border-bottom:none;}
+  .founder .role{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  .founder .name{
+    font-family:'Fraunces',serif;
+    font-size:22px;
+  }
+  .since-line{
+    margin-top:32px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--slate);
+  }
+
+  @media (max-width:780px){
+    .why-grid{grid-template-columns:1fr;}
+    .founders{border-left:none;padding-left:0;border-top:1px solid var(--line-dark);padding-top:32px;}
+  }
+
+  /* ---------- CONTACT ---------- */
+  .contact-box{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:32px;
+  }
+  .contact-box h2{
+    font-size:clamp(30px,4vw,46px);
+    max-width:560px;
+  }
+  .contact-right{
+    text-align:right;
+  }
+  .contact-email{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:22px;
+    color:var(--accent);
+    display:inline-block;
+    margin-bottom:6px;
+  }
+  .contact-note{
+    font-size:13px;
+    color:var(--slate);
+  }
+  @media (max-width:780px){
+    .contact-right{text-align:left;}
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:36px 0;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:var(--slate);
+    flex-wrap:wrap;
+    gap:10px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">Sky<span>Brilliance</span></div>
+    <div class="nav-links">
+      <a href="#what">What we do</a>
+      <a href="#for">Who it's for</a>
+      <a href="#process">Process</a>
+      <a href="#why">Founders</a>
+    </div>
+    <a href="mailto:ukmohan18@gmail.com" class="nav-cta">Let's talk</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Digital strategy · Value consulting · Since 2021</span>
+    <h1>Clarity first. <em>Then</em><br>growth that compounds.</h1>
+    <p class="lede">SkyBrilliance helps startups and small businesses turn a scattered digital presence into a strategy that actually moves revenue — and find the growth that's already sitting inside the business, unseen.</p>
+    <div class="cta-row">
+      <a href="mailto:ukmohan18@gmail.com" class="btn-primary">Start a conversation</a>
+      <a href="#what" class="btn-ghost">See how we work</a>
+    </div>
+    <div class="horizon"></div>
+  </div>
+</header>
+
+<section id="what">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>What we do</h2>
+      <p>Three ways we work with a business, usually together, sometimes on their own.</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <span class="mark">01</span>
+        <h3>Digital Strategy</h3>
+        <p>A clear, honest read of where your digital presence stands today, and a plan built around your actual resources — not a template pulled from a bigger company.</p>
+      </div>
+      <div class="pillar">
+        <span class="mark">02</span>
+        <h3>Value Consulting</h3>
+        <p>We look at how your business creates value for the people who pay you, and where that value is getting lost between what you offer and what customers see.</p>
+      </div>
+      <div class="pillar">
+        <span class="mark">03</span>
+        <h3>Growth Discovery</h3>
+        <p>Most small businesses are sitting on growth they haven't noticed yet. We help you find it — in your data, your customers, or your own overlooked strengths.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="for">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Who it's for</h2>
+      <p>Built for the businesses that don't have a marketing department to hand this to.</p>
+    </div>
+    <div class="for-grid">
+      <ul class="for-list">
+        <li><span class="q">01</span><span class="for-copy">Startups that have a product but <strong>no clear digital strategy</strong> behind it yet.</span></li>
+        <li><span class="q">02</span><span class="for-copy">Small businesses that know they should be doing more online, but <strong>aren't sure where to start</strong>.</span></li>
+        <li><span class="q">03</span><span class="for-copy">Founders who are close enough to the business that they <strong>can't see where growth is hiding</strong>.</span></li>
+        <li><span class="q">04</span><span class="for-copy">Teams that need a second, outside opinion before they <strong>commit budget to a direction</strong>.</span></li>
+      </ul>
+      <div>
+        <p class="for-copy">If any of that sounds familiar, you're probably not short on effort. You're short on a clear read of where that effort should go next. That's the gap we work in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>How we get there</h2>
+      <p>A straightforward sequence. Each step depends on the one before it.</p>
+    </div>
+    <div class="process">
+      <div class="step">
+        <div class="num">01 / Assess</div>
+        <div><h3>Understand where things stand</h3><p>We look honestly at your current digital presence, positioning, and numbers — no assumptions carried in from outside.</p></div>
+      </div>
+      <div class="step">
+        <div class="num">02 / Identify</div>
+        <div><h3>Find the real opportunity</h3><p>We separate what looks promising from what will actually move revenue, and narrow in on the growth that's realistic for your size.</p></div>
+      </div>
+      <div class="step">
+        <div class="num">03 / Build</div>
+        <div><h3>Build the strategy</h3><p>A plan sized to your resources, with a clear order of operations — not a hundred initiatives at once.</p></div>
+      </div>
+      <div class="step">
+        <div class="num">04 / Execute</div>
+        <div><h3>Execute and scale</h3><p>We stay involved through execution, adjusting as real numbers come in, so the plan holds up outside the slide deck.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="why" class="dark">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Why SkyBrilliance</h2>
+      <p>Small and deliberate, by choice.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-text">
+        <p>We don't run this like a large agency handing you off to a junior account manager. Every business we take on gets direct attention from people who've actually done the work — not a templated playbook resold to every client.</p>
+        <p>No inflated case studies, no invented numbers. Just a clear-eyed look at your business and a plan we're willing to stand behind.</p>
+      </div>
+      <div class="founders">
+        <div class="founder">
+          <div class="role">Founder</div>
+          <div class="name">Utkarsh Mohan</div>
+        </div>
+        <div class="founder">
+          <div class="role">Co-founder</div>
+          <div class="name">Shashwat Agarwal</div>
+        </div>
+        <div class="since-line">SkyBrilliance — building since 2021</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="contact-box">
+      <h2>Let's find the growth<br>you haven't seen yet.</h2>
+      <div class="contact-right">
+        <a href="mailto:ukmohan18@gmail.com" class="contact-email">ukmohan18@gmail.com</a>
+        <div class="contact-note">Reach out directly, no forms in the way.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:10px;">
+    <span>© 2026 SkyBrilliance. Since 2021.</span>
+    <span>Mumbai, India</span>
+  </div>
+</footer>
+
+</body>
+</html>
