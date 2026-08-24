@@ -1,0 +1,6 @@
+# Sentinel has zero external dependencies for Agent 2 (the core detector) —
+# it's built on Python's standard library (csv, json, urllib) on purpose,
+# so it's easy to read, easy to audit, and has nothing to break in a fresh env.
+#
+# If you later swap the hand-rolled HTTP call for the official SDK, add:
+# anthropic>=0.40.0
