@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sentinel — Live Demo</title>
+<style>
+  :root {
+    --bg: #0B0D0E;
+    --ink: #EDEAE0;
+    --muted: #8A8F8C;
+    --line: #232726;
+    --teal: #2E9E8F;
+    --teal-dim: #1E5850;
+    --gold: #C9A227;
+    --card: #12151566;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    margin: 0;
+    padding: 40px 24px 80px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  h1 {
+    font-size: 28px;
+    margin-bottom: 4px;
+    font-weight: normal;
+  }
+  .subtitle {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 36px;
+  }
+  .panel {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin-bottom: 20px;
+    background: var(--card);
+  }
+  .panel h2 {
+    font-size: 15px;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 16px;
+    font-weight: normal;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    color: var(--muted);
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  label:first-child { margin-top: 0; }
+  input[type=text], input[type=number], input[type=file] {
+    width: 100%;
+    background: #0000004d;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 9px 10px;
+    border-radius: 5px;
+    font-family: Georgia, serif;
+    font-size: 14px;
+  }
+  .row { display: flex; gap: 16px; }
+  .row > div { flex: 1; }
+  button {
+    background: var(--teal);
+    color: #06110F;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 22px;
+    font-family: Georgia, serif;
+  }
+  button:disabled { background: var(--teal-dim); cursor: not-allowed; }
+  button:hover:not(:disabled) { opacity: 0.9; }
+  .status {
+    font-family: 'Courier New', monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 14px;
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+  .status .ok { color: var(--teal); }
+  .status .err { color: #d9695f; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--line);
+  }
+  th { color: var(--muted); font-family: 'Courier New', monospace; font-size: 11px; text-transform: uppercase; }
+  .narrative, .quality {
+    font-size: 15px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+  }
+  canvas { width: 100%; height: 220px; display: block; margin-top: 10px; }
+  .hint { font-size: 12px; color: var(--muted); font-family: 'Courier New', monospace; margin-top: 10px; }
+  .badge {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+  }
+  .badge.llm { background: #1a3a35; color: var(--teal); }
+  .badge.det { background: #3a2f10; color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Sentinel</h1>
+  <div class="subtitle">Live demo — Agents 1 &amp; 3 call Claude directly in this browser, no API key needed</div>
+
+  <div class="panel">
+    <h2>Input</h2>
+    <label>CSV file (needs a date column and a numeric metric column)</label>
+    <input type="file" id="csvFile" accept=".csv">
+    <div class="row">
+      <div>
+        <label>Date column name</label>
+        <input type="text" id="dateCol" value="date">
+      </div>
+      <div>
+        <label>Value column name</label>
+        <input type="text" id="valueCol" value="sessions">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Rolling window (days)</label>
+        <input type="number" id="windowSize" value="14">
+      </div>
+      <div>
+        <label>Z-score threshold</label>
+        <input type="number" id="zThreshold" value="2.0" step="0.1">
+      </div>
+    </div>
+    <button id="runBtn" disabled>Load a CSV first</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="panel" id="chartPanel" style="display:none;">
+    <h2>Series <span class="badge det">Agent 2 · deterministic</span></h2>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="panel" id="qualityPanel" style="display:none;">
+    <h2>Data quality check <span class="badge llm">Agent 1 · LLM</span></h2>
+    <div class="quality" id="qualityOut"></div>
+  </div>
+
+  <div class="panel" id="episodesPanel" style="display:none;">
+    <h2>Detected episodes <span class="badge det">Agent 2 · deterministic</span></h2>
+    <table id="episodesTable"></table>
+  </div>
+
+  <div class="panel" id="narrativePanel" style="display:none;">
+    <h2>Narrative brief <span class="badge llm">Agent 3 · LLM</span></h2>
+    <div class="narrative" id="narrativeOut"></div>
+  </div>
+</div>
+
+<script>
+let parsedRows = null;
+
+document.getElementById('csvFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  const statusEl = document.getElementById('status');
+  const runBtn = document.getElementById('runBtn');
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    parsedRows = evt.target.result;
+    statusEl.innerHTML = `<span class="ok">Loaded ${file.name} (${(file.size/1024).toFixed(1)} KB)</span>`;
+    runBtn.disabled = false;
+    runBtn.textContent = 'Run Sentinel';
+  };
+  reader.onerror = () => {
+    statusEl.innerHTML = `<span class="err">Could not read file.</span>`;
+  };
+  reader.readAsText(file);
+});
+
+function normalizeDate(raw) {
+  raw = raw.trim().replace(/^"|"$/g, '');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  if (/^\d{8}$/.test(raw)) return `${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}`;
+  let m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+  return null;
+}
+
+function splitCsvLine(line) {
+  // handles simple quoted fields with commas, e.g. "1,150"
+  const cells = [];
+  let cur = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQuotes = !inQuotes; continue; }
+    if (c === ',' && !inQuotes) { cells.push(cur); cur = ''; continue; }
+    cur += c;
+  }
+  cells.push(cur);
+  return cells.map(c => c.trim());
+}
+
+function findHeaderRow(lines, dateCol, valueCol) {
+  const target = [dateCol.toLowerCase(), valueCol.toLowerCase()];
+  for (let i = 0; i < Math.min(lines.length, 20); i++) {
+    const cells = splitCsvLine(lines[i]).map(c => c.toLowerCase());
+    if (target.every(t => cells.includes(t))) return i;
+  }
+  return 0;
+}
+
+function loadSeries(text, dateCol, valueCol) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+  const headerIdx = findHeaderRow(lines, dateCol, valueCol);
+  const headerCells = splitCsvLine(lines[headerIdx]).map(c => c.toLowerCase());
+  const dateIdx = headerCells.indexOf(dateCol.toLowerCase());
+  const valueIdx = headerCells.indexOf(valueCol.toLowerCase());
+  if (dateIdx === -1 || valueIdx === -1) {
+    throw new Error(`Columns not found. CSV header: [${headerCells.join(', ')}]. Expected date_col='${dateCol}', value_col='${valueCol}'.`);
+  }
+  const dates = [], values = [];
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    const cells = splitCsvLine(lines[i]);
+    const rawDate = cells[dateIdx], rawValue = cells[valueIdx];
+    if (!rawDate || !rawValue) continue;
+    const d = normalizeDate(rawDate);
+    const v = parseFloat(rawValue.replace(/,/g, ''));
+    if (d === null || isNaN(v)) continue; // skip junk rows (e.g. "Totals")
+    dates.push(d); values.push(v);
+  }
+  return { dates, values };
+}
+
+function detectAnomalies(dates, values, window, zThreshold) {
+  const anomalies = [];
+  for (let i = window; i < values.length; i++) {
+    const trailing = values.slice(i - window, i);
+    const mean = trailing.reduce((a,b) => a+b, 0) / window;
+    const variance = trailing.reduce((a,b) => a + (b-mean)**2, 0) / window;
+    const std = Math.sqrt(variance);
+    if (std === 0) continue;
+    const z = (values[i] - mean) / std;
+    if (Math.abs(z) >= zThreshold) {
+      anomalies.push({
+        date: dates[i], value: values[i], index: i,
+        z: Math.round(z*100)/100,
+        direction: z > 0 ? 'spike' : 'drop'
+      });
+    }
+  }
+  return anomalies;
+}
+
+function mergeEpisodes(anomalies) {
+  if (anomalies.length === 0) return [];
+  const episodes = [[anomalies[0]]];
+  for (let i = 1; i < anomalies.length; i++) {
+    const a = anomalies[i];
+    const last = episodes[episodes.length-1][episodes[episodes.length-1].length-1];
+    const gapDays = (new Date(a.date) - new Date(last.date)) / 86400000;
+    if (gapDays <= 3 && a.direction === last.direction) {
+      episodes[episodes.length-1].push(a);
+    } else {
+      episodes.push([a]);
+    }
+  }
+  return episodes;
+}
+
+async function callClaude(prompt, maxTokens) {
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: maxTokens,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+  if (!resp.ok) {
+    const errText = await resp.text();
+    throw new Error(`API error ${resp.status}: ${errText}`);
+  }
+  const data = await resp.json();
+  return data.content.map(b => b.text || "").join("");
+}
+
+function drawChart(dates, values, episodes) {
+  const canvas = document.getElementById('chart');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 220;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,w,h);
+
+  const min = Math.min(...values), max = Math.max(...values);
+  const pad = 16;
+  const xScale = i => pad + (i/(values.length-1)) * (w - pad*2);
+  const yScale = v => h - pad - ((v-min)/(max-min || 1)) * (h - pad*2);
+
+  const flaggedIdx = new Set();
+  episodes.forEach(ep => ep.forEach(a => flaggedIdx.add(a.index)));
+
+  ctx.beginPath();
+  ctx.strokeStyle = '#2E9E8F';
+  ctx.lineWidth = 2;
+  values.forEach((v,i) => {
+    const x = xScale(i), y = yScale(v);
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  flaggedIdx.forEach(i => {
+    ctx.beginPath();
+    ctx.fillStyle = '#C9A227';
+    ctx.arc(xScale(i), yScale(values[i]), 3.5, 0, Math.PI*2);
+    ctx.fill();
+  });
+}
+
+document.getElementById('runBtn').addEventListener('click', async () => {
+  const statusEl = document.getElementById('status');
+  const runBtn = document.getElementById('runBtn');
+  const dateCol = document.getElementById('dateCol').value.trim();
+  const valueCol = document.getElementById('valueCol').value.trim();
+  const window_ = parseInt(document.getElementById('windowSize').value, 10);
+  const zThreshold = parseFloat(document.getElementById('zThreshold').value);
+
+  ['chartPanel','qualityPanel','episodesPanel','narrativePanel'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+
+  runBtn.disabled = true;
+  try {
+    statusEl.textContent = 'Parsing CSV...';
+    const { dates, values } = loadSeries(parsedRows, dateCol, valueCol);
+    statusEl.innerHTML = `<span class="ok">Loaded ${values.length} points.</span> Running Agent 1...`;
+
+    // Agent 1: data quality check (LLM)
+    document.getElementById('qualityPanel').style.display = 'block';
+    const sample = dates.slice(0,5).map((d,i) => [d, values[i]]);
+    const qualityPrompt = `You are a data quality checker. Here is a sample of a time series (date, value): ${JSON.stringify(sample)}. Total points: ${values.length}. In 2-3 sentences, note anything that looks like a data quality issue (gaps, duplicate dates, obviously wrong scale) or say it looks clean.`;
+    const qualityNote = await callClaude(qualityPrompt, 200);
+    document.getElementById('qualityOut').textContent = qualityNote;
+
+    // Agent 2: deterministic detection
+    statusEl.innerHTML = `<span class="ok">Agent 1 done.</span> Running Agent 2 (deterministic)...`;
+    const anomalies = detectAnomalies(dates, values, window_, zThreshold);
+    const episodes = mergeEpisodes(anomalies);
+
+    document.getElementById('chartPanel').style.display = 'block';
+    drawChart(dates, values, episodes);
+
+    document.getElementById('episodesPanel').style.display = 'block';
+    const table = document.getElementById('episodesTable');
+    if (episodes.length === 0) {
+      table.innerHTML = '<tr><td>No anomalies above threshold.</td></tr>';
+    } else {
+      let rows = '<tr><th>Direction</th><th>Start</th><th>End</th><th>Days</th><th>Worst Z</th></tr>';
+      episodes.forEach(ep => {
+        const worstZ = Math.max(...ep.map(a => Math.abs(a.z)));
+        rows += `<tr><td>${ep[0].direction}</td><td>${ep[0].date}</td><td>${ep[ep.length-1].date}</td><td>${ep.length}</td><td>${worstZ}</td></tr>`;
+      });
+      table.innerHTML = rows;
+    }
+
+    // Agent 3: narrative (LLM) — only if there's something to narrate
+    if (episodes.length > 0) {
+      statusEl.innerHTML = `<span class="ok">Agent 2 done — ${episodes.length} episode(s).</span> Running Agent 3...`;
+      document.getElementById('narrativePanel').style.display = 'block';
+      const episodeSummaries = episodes.map(ep => ({
+        start: ep[0].date, end: ep[ep.length-1].date, direction: ep[0].direction,
+        days: ep.length, worst_z_score: Math.max(...ep.map(a => Math.abs(a.z))),
+        value_start: ep[0].value, value_end: ep[ep.length-1].value
+      }));
+      const narrativePrompt = `You are writing a short weekly brief for a small business owner about their '${valueCol}' metric. Here are statistically flagged anomaly episodes (already detected — do not re-derive, just interpret): ${JSON.stringify(episodeSummaries)}. Write a plain-English brief: what changed, roughly when, and one or two plausible business reasons worth checking (e.g. seasonality, a channel change, a pricing change) — frame these as questions to investigate, not confirmed causes. Keep it under 150 words. No preamble.`;
+      const narrative = await callClaude(narrativePrompt, 400);
+      document.getElementById('narrativeOut').textContent = narrative;
+      statusEl.innerHTML = `<span class="ok">Done. Full pipeline ran successfully.</span>`;
+    } else {
+      statusEl.innerHTML = `<span class="ok">Done.</span> No episodes to narrate.`;
+    }
+
+  } catch (err) {
+    statusEl.innerHTML = `<span class="err">Error: ${err.message}</span>`;
+    console.error(err);
+  } finally {
+    runBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
