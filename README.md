@@ -46,7 +46,7 @@ Flags:
 - `--output` — custom path for the markdown brief
 - `--no-md` — skip writing the markdown file, stdout only
 
-## Current limitations (honest, not marketing copy)
+## Current limitations 
 
 - Single metric, single CSV, single run — no scheduling, no multi-metric
   correlation yet.
@@ -60,7 +60,7 @@ Flags:
   and `merge_consecutive_anomalies` — the deterministic core is the part
   most worth testing rigorously).
 
-## Roadmap (not yet built — do not claim these publicly)
+## Roadmap
 
 - Multi-metric correlation ("sessions dropped, did ad spend also change?")
 - Scheduled runs + email/Slack delivery of the brief
